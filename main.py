@@ -71,26 +71,42 @@ def set_header():
 
 # Fetching CE and PE data based on Nearest Expiry Date
 def request_oi(url):
+    global df
     response_text = get_data(url)
     data = json.loads(response_text)
     currExpiryDate = data["records"]["expiryDates"][0]
     for item in data['records']['data']:
         if item["expiryDate"] == currExpiryDate:
-            OIList.append(
-                [str(data["records"]["timestamp"])[0:17], item["strikePrice"], item["CE"]["changeinOpenInterest"],
-                 item["PE"]["changeinOpenInterest"]])
+            new_row = {'Time': str(data["records"]["timestamp"])[0:17],
+                       'StrikePrice':item["strikePrice"],
+                       'CECOi':item["CE"]["changeinOpenInterest"],
+                       'PECOI':item["PE"]["changeinOpenInterest"]
+                       }
 
-            print(OIList)
+            df.loc[len(df)] = new_row
+            # print(new_row)
+            # OIList.append(
+            #     [str(data["records"]["timestamp"])[0:17], item["strikePrice"], item["CE"]["changeinOpenInterest"],
+            #      item["PE"]["changeinOpenInterest"]])
+
+            # print(OIList)
             # OIDF = pd.DataFrame(OIDict)
-            # print(data["records"]["timestamp"], item["strikePrice"], item["CE"]["changeinOpenInterest"],
+            # print(data["records"]["timestamp"], item["strikePrice"], item["c"]["changeinOpenInterest"],
             #       item["PE"]["changeinOpenInterest"])
 
 
-OIList = []
+OIDict = {
+    'Time': [],
+    'StrikePrice': [],
+    'CECOi': [],
+    'PECOI': []
+}
+
+df = pd.DataFrame(OIDict)
 
 while True:
     try:
         request_oi(url_nf)
-        # print(OIDF)
+        print(df)
     except Exception as e:
         print(e.__repr__())
